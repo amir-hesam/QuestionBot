@@ -1,0 +1,15 @@
+Options -Indexes
+AddDefaultCharset UTF-8
+
+<IfModule mod_authz_core.c>
+  <FilesMatch "^(config\.php|schema\.sql|error\.log)$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+  <FilesMatch "^(config\.php|schema\.sql|error\.log)$">
+    Order allow,deny
+    Deny from all
+  </FilesMatch>
+</IfModule>
