@@ -107,6 +107,20 @@ try {
     $dbStatus = 'خطا: ' . $e->getMessage();
 }
 
+$panelState = null;
+$panelError = '';
+$panelUrl = '';
+try {
+    $panelState = PanelAccess::state();
+    $panelUrl = PanelAccess::panelUrl();
+} catch (Throwable $e) {
+    $panelError = $e->getMessage();
+}
+$panelEnabled = $panelState !== null && !PanelAccess::expired($panelState);
+if ($panelUrl === '') {
+    $panelUrl = base_url() . '/panel/';
+}
+
 $cron = base_url();
 $links = array(
     'migrate' => 'install.php?key=' . rawurlencode($key) . '&action=migrate',
@@ -178,7 +192,21 @@ header('X-Content-Type-Options: nosniff');
    <tr><td>کلید مخفی وب‌هوک</td><td class="<?php echo $secretOk ? 'ok' : 'err'; ?>"><?php echo $secretOk ? 'مناسب' : 'ضعیف یا پیش‌فرض'; ?></td></tr>
    <tr><td>ادمین‌ها</td><td class="<?php echo $adminOk ? 'ok' : 'err'; ?>"><?php echo Farsi::digits(count($admins)); ?> عدد</td></tr>
    <tr><td>حالت دریافت</td><td><code><?php echo h($mode); ?></code></td></tr>
+   <tr><td>پنل وب</td><td class="<?php echo $panelEnabled ? 'ok' : 'warn'; ?>"><?php echo $panelEnabled ? 'فعال' : 'غیرفعال (در تلگرام /panel بزنید)'; ?><?php echo $panelError !== '' ? h(' — ' . $panelError) : ''; ?></td></tr>
   </table>
+ </div>
+
+ <div class="card">
+  <h2>پنل وب مدیریت</h2>
+  <p style="font-size:13px">آدرس پنل:</p>
+  <p><a class="btn" href="<?php echo h($panelUrl); ?>" target="_blank" rel="noopener">بازکردن پنل وب</a></p>
+  <code><?php echo h($panelUrl); ?></code>
+  <p style="font-size:13px;margin-top:12px">
+   برای ساخت رمز ورود، در تلگرام دکمه «🔐 پنل وب» را بزنید یا دستور <code>/panel</code> را در چت خصوصی ربات بفرستید.
+   هر بار رمز قبلی و همه نشست‌های وب باطل می‌شوند. نام کاربری پیش‌فرض <code><?php echo h(PanelAccess::username()); ?></code> است
+   و از <code>config.php → panel.user</code> قابل تغییر است.
+  </p>
+  <p style="font-size:13px;color:#555">اگر پنل را جابه‌جا کردید یا از حالت poll استفاده می‌کنید، آدرس کامل را در <code>config.php → panel.url</code> بگذارید.</p>
  </div>
 
  <div class="card">
@@ -202,6 +230,7 @@ header('X-Content-Type-Options: nosniff');
    <li>دکمه «ثبت وب‌هوک» را بزنید (هاست باید SSL داشته باشد).</li>
    <li>در تلگرام به ربات <code>/start</code> بفرستید و با <code>/newquiz</code> آزمون بسازید.</li>
    <li>با <code>/addstudent</code> برای هر دانش‌آموز کد بسازید و کد را به او بدهید.</li>
+   <li>برای ورود به پنل وب، در چت خصوصی ربات دکمه «🔐 پنل وب» یا دستور <code>/panel</code> را بزنید.</li>
    <li>کران‌جاب پایان خودکار را تنظیم کنید.</li>
    <li>در پایان، <code>install.php</code> را حذف کنید.</li>
   </ul>

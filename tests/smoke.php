@@ -36,7 +36,7 @@ function callbacks_of($kb)
     return $out;
 }
 
-foreach (array('Farsi', 'Codes', 'Order', 'Timer', 'Keyboard', 'Schema', 'Db', 'Telegram', 'Session', 'Router', 'AdminFlow', 'StudentFlow', 'Guard') as $cls) {
+foreach (array('Farsi', 'Codes', 'Order', 'Timer', 'Keyboard', 'Schema', 'Db', 'Telegram', 'Session', 'Router', 'AdminFlow', 'StudentFlow', 'Guard', 'Panel', 'PanelAccess', 'PanelAuth', 'ResultsExport') as $cls) {
     ok(class_exists($cls), 'class loads: ' . $cls);
 }
 
@@ -52,6 +52,27 @@ ok(Farsi::csvSafe('hello') === 'hello', 'Farsi::csvSafe leaves normal text');
 $long = str_repeat('x', 9000);
 $parts = Farsi::split($long, 4000);
 ok(count($parts) === 3 && implode('', $parts) === $long, 'Farsi::split preserves content');
+
+$panelPass = PanelAccess::generatePassword(24);
+ok(strlen($panelPass) === 24, 'PanelAccess::generatePassword length');
+ok(strspn($panelPass, PanelAccess::ALPHABET) === 24, 'PanelAccess::generatePassword uses safe alphabet');
+$panelHash = PanelAccess::hashPassword('Secret-123');
+ok(PanelAccess::verifyPassword('Secret-123', $panelHash) === true, 'PanelAccess::verifyPassword accepts correct password');
+ok(PanelAccess::verifyPassword('wrong', $panelHash) === false, 'PanelAccess::verifyPassword rejects wrong password');
+ok(PanelAccess::verifyPassword('Secret-123', '') === false, 'PanelAccess::verifyPassword rejects empty hash');
+ok(PanelAccess::username() === 'admin', 'PanelAccess::username defaults to admin');
+ok(Panel::url('quiz', array('id' => 3)) === 'index.php?page=quiz&id=3', 'Panel::url builds query string');
+ok(Panel::url() === 'index.php', 'Panel::url defaults to dashboard');
+ok(Panel::absoluteUrl('https://example.com/panel/') === true, 'Panel::absoluteUrl accepts https');
+ok(Panel::absoluteUrl('javascript:alert(1)') === false, 'Panel::absoluteUrl rejects javascript');
+ok(strpos(Panel::like('50%_x'), '\\%') !== false && strpos(Panel::like('50%_x'), '\\_') !== false, 'Panel::like escapes LIKE wildcards');
+list($p, $pages, $off) = Panel::pageNumber(101, 20, 9);
+ok($p === 6 && $pages === 6 && $off === 100, 'Panel::pageNumber clamps and offsets');
+ok(is_array(Keyboard::panelLink('https://example.com/panel/')), 'Keyboard::panelLink builds URL keyboard');
+ok(Keyboard::panelLink('javascript:alert(1)') === null, 'Keyboard::panelLink rejects unsafe URL');
+$kbs = callbacks_of(Keyboard::adminMenu());
+ok(in_array('adm:panel', $kbs, true), 'admin menu includes panel button');
+ok(ResultsExport::filename(0) !== ResultsExport::filename(7), 'ResultsExport filename distinguishes quizzes');
 
 $code = Codes::generate(6);
 ok(strlen($code) === 6, 'Codes::generate length');
@@ -120,10 +141,11 @@ foreach ($stmts as $s) {
 }
 ok($allCreate, 'Schema statements are CREATE TABLE only');
 
-$roots = array('index.php', 'install.php', 'poll.php', 'cron_finish.php', 'export.php', 'config.php');
+$roots = array('index.php', 'install.php', 'poll.php', 'cron_finish.php', 'export.php', 'config.php', 'panel/index.php', 'panel/views/layout.php', 'panel/views/login.php', 'panel/pages/dashboard.php', 'panel/pages/students.php', 'panel/pages/student.php', 'panel/pages/quizzes.php', 'panel/pages/quiz.php', 'panel/pages/question.php', 'panel/pages/results.php', 'panel/pages/attempt.php', 'panel/pages/broadcast.php', 'panel/pages/tools.php');
 foreach ($roots as $f) {
     ok(is_file(dirname(__DIR__) . '/' . $f), 'entry file exists: ' . $f);
 }
+ok(is_array(App::cfg('panel')), 'config has panel block');
 
 echo "\n" . $GLOBALS['pass'] . ' passed, ' . $GLOBALS['fail'] . " failed\n";
 exit($GLOBALS['fail'] === 0 ? 0 : 1);

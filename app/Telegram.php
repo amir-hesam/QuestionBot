@@ -93,7 +93,7 @@ class Telegram
         return str_replace($this->token, '***', (string) $s);
     }
 
-    public function send($chatId, $text, $kb = null)
+    public function send($chatId, $text, $kb = null, array $options = array())
     {
         $text = (string) $text;
         if (trim($text) === '') {
@@ -103,12 +103,12 @@ class Telegram
         $last = count($chunks) - 1;
         $res = array('ok' => false);
         foreach ($chunks as $i => $chunk) {
-            $p = array(
+            $p = array_merge($options, array(
                 'chat_id' => $chatId,
                 'text' => $chunk,
                 'parse_mode' => 'HTML',
                 'disable_web_page_preview' => true,
-            );
+            ));
             if ($i === $last && $kb !== null) {
                 $p['reply_markup'] = $kb;
             }
@@ -121,6 +121,24 @@ class Telegram
             }
         }
         return $res;
+    }
+
+    public function sendSecret($chatId, $text, $kb = null)
+    {
+        $res = $this->send($chatId, $text, $kb, array('protect_content' => true));
+        if (empty($res['ok']) && isset($res['description'])
+            && stripos($res['description'], 'protect') !== false) {
+            $res = $this->send($chatId, $text, $kb);
+        }
+        return $res;
+    }
+
+    public function deleteMessage($chatId, $messageId)
+    {
+        return $this->call('deleteMessage', array(
+            'chat_id' => $chatId,
+            'message_id' => (int) $messageId,
+        ), 10);
     }
 
     public function edit($chatId, $mid, $text, $kb = null)

@@ -73,6 +73,10 @@ class Router
             }
 
             if (App::isAdmin($uid)) {
+                if ($cmd === '/panel') {
+                    AdminFlow::panelLink($uid, $chatId);
+                    return;
+                }
                 AdminFlow::handle($cmd, $args, $uid, $chatId, $from);
                 return;
             }

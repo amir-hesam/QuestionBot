@@ -39,6 +39,17 @@ class Keyboard
             array(array('text' => '📝 لیست آزمون‌ها', 'callback_data' => 'adm:quizzes')),
             array(array('text' => '👥 لیست دانش‌آموزان', 'callback_data' => 'pg:students:1')),
             array(array('text' => '➕ آزمون جدید', 'callback_data' => 'adm:newquiz')),
+            array(array('text' => '🔐 پنل وب', 'callback_data' => 'adm:panel')),
+        ));
+    }
+
+    public static function panelLink($url)
+    {
+        if (empty($url) || !preg_match('#^https?://#i', (string) $url)) {
+            return null;
+        }
+        return self::kb(array(
+            array(array('text' => '🌐 باز کردن پنل مدیریت', 'url' => $url)),
         ));
     }
 

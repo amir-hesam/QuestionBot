@@ -16,6 +16,55 @@ class AdminFlow
         $tg->send($chatId, $text, $kb);
     }
 
+    public static function panelLink($uid, $chatId)
+    {
+        if (!App::isAdmin($uid)) {
+            return App::tg()->send($chatId, 'دسترسی ندارید.');
+        }
+        if (!self::isPrivateChat($chatId, $uid)) {
+            return App::tg()->send($chatId, '🔐 فعال‌سازی پنل وب فقط در چت خصوصی با ربات امکان‌پذیر است.');
+        }
+        return self::rotatePanel($uid);
+    }
+
+    private static function rotatePanel($uid)
+    {
+        $tg = App::tg();
+        $old = PanelAccess::lastMessage();
+        if ($old && isset($old['chat_id']) && isset($old['message_id'])) {
+            try {
+                $tg->deleteMessage($old['chat_id'], $old['message_id']);
+            } catch (Throwable $e) {
+                App::log('panel del msg: ' . $e->getMessage());
+            }
+        }
+
+        $rotated = PanelAccess::rotate($uid);
+        $url = PanelAccess::panelUrl();
+        $user = PanelAccess::username();
+        $pass = $rotated['password'];
+
+        $text = "🔐 <b>پنل وب مدیریت فعال شد</b>\n\n"
+            . "آدرس پنل:\n" . Farsi::esc($url) . "\n\n"
+            . "نام کاربری: <code>" . Farsi::esc($user) . "</code>\n"
+            . "رمز عبور: <code>" . Farsi::esc($pass) . "</code>\n\n"
+            . "⚠️ این رمز فقط یک بار نمایش داده شده و با هر بار فعال‌سازی رمز جدید جایگزین می‌شود.\n"
+            . "با هر چرخش رمز، همه نشست‌های وب قبلی خارج خواهند شد.\n\n"
+            . "برای غیرفعال‌کردن پنل، از صفحه «ابزارها» در پنل استفاده کنید.";
+
+        $kb = Keyboard::panelLink($url);
+        $res = $tg->sendSecret($uid, $text, $kb);
+        if (!empty($res['ok']) && isset($res['result']['message_id'])) {
+            PanelAccess::rememberMessage($uid, (int) $res['result']['message_id']);
+        }
+        return $res;
+    }
+
+    private static function isPrivateChat($chatId, $uid)
+    {
+        return (string) $chatId === (string) $uid;
+    }
+
     private static function len($s)
     {
         return Farsi::len($s);
@@ -68,6 +117,8 @@ class AdminFlow
                 return self::results($args, $chatId);
             case '/broadcast':
                 return self::broadcast($args, $chatId);
+            case '/panel':
+                return self::panelLink($uid, $chatId);
             default:
                 return self::help($chatId);
         }
@@ -95,7 +146,8 @@ class AdminFlow
         $t .= "/toggle &lt;آزمون&gt; — فعال/غیرفعال\n";
         $t .= "/stats &lt;آزمون&gt; — آمار\n";
         $t .= "/results &lt;آزمون&gt; — نتایج اخیر\n";
-        $t .= "/broadcast &lt;متن&gt; — پیام همگانی\n\n";
+        $t .= "/broadcast &lt;متن&gt; — پیام همگانی\n";
+        $t .= "/panel — فعال‌سازی و تغییر رمز پنل وب\n\n";
         $t .= "/cancel — لغو عملیات جاری";
         App::tg()->send($chatId, $t, Keyboard::adminMenu());
     }
@@ -719,6 +771,9 @@ class AdminFlow
             }
             if ($what === 'newquiz') {
                 return self::newQuizStart($uid, $chatId);
+            }
+            if ($what === 'panel') {
+                return self::panelLink($uid, $chatId);
             }
             return self::menu($uid, $chatId);
         }
