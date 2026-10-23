@@ -1,1 +1,2 @@
 [22-Oct-2026 14:07:21 Asia/Tehran] [telebot] cron_finish: could not find driver
+[23-Oct-2026 16:03:05 Asia/Tehran] PHP Deprecated:  Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect since PHP 8.1 in C:\Users\RP.co\AppData\Local\Temp\opencode\panel_render_test.php on line 83

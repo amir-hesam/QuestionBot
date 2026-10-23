@@ -12,18 +12,15 @@ if (!isset($flashes) || !is_array($flashes)) {
     $flashes = array();
 }
 ?><!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ورود به پنل مدیریت</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
-<script src="assets/app.js" defer></script>
+<link rel="stylesheet" href="assets/style.css?v=2">
+<script src="assets/app.js?v=2" defer></script>
 </head>
-<body class="login-body" data-theme="dark">
+<body class="login-body">
 <main class="login-card">
   <div class="login-brand">
     <span class="brand-mark">🤖</span>

@@ -15,16 +15,13 @@ if (!isset($flashes) || !is_array($flashes)) {
     $flashes = array();
 }
 ?><!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?php echo Panel::h($title); ?> — پنل مدیریت</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
-<script src="assets/app.js" defer></script>
+<link rel="stylesheet" href="assets/style.css?v=2">
+<script src="assets/app.js?v=2" defer></script>
 </head>
 <body>
 <header class="topbar">
@@ -38,6 +35,7 @@ if (!isset($flashes) || !is_array($flashes)) {
     <?php endforeach; ?>
   </nav>
   <div class="account">
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="تغییر تم">🌙</button>
     <span class="muted"><?php echo Panel::h($user); ?></span>
     <form method="post" action="<?php echo Panel::h(Panel::url('logout')); ?>" class="inline">
       <?php echo PanelAuth::csrfField(); ?>
