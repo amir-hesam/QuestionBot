@@ -212,6 +212,21 @@ class Telegram
         return $this->call('getWebhookInfo');
     }
 
+    public function setChatMenuButton($url, $text = 'آزمون‌ها')
+    {
+        if (!preg_match('#^https://#i', (string) $url)) {
+            return array('ok' => false, 'description' => 'web_app URL must be HTTPS');
+        }
+        $button = array(
+            'type' => 'web_app',
+            'text' => Farsi::clip((string) $text, 32),
+            'web_app' => array('url' => (string) $url),
+        );
+        return $this->call('setChatMenuButton', array(
+            'menu_button' => json_encode($button, JSON_UNESCAPED_UNICODE),
+        ));
+    }
+
     public function getUpdates($offset = 0, $timeout = 0)
     {
         return $this->call('getUpdates', array(

@@ -36,7 +36,21 @@ function callbacks_of($kb)
     return $out;
 }
 
-foreach (array('Farsi', 'Codes', 'Order', 'Timer', 'Keyboard', 'Schema', 'Db', 'Telegram', 'Session', 'Router', 'AdminFlow', 'StudentFlow', 'Guard', 'Panel', 'PanelAccess', 'PanelAuth', 'ResultsExport') as $cls) {
+function buttons_of($kb)
+{
+    $out = array();
+    if (!is_array($kb) || !isset($kb['inline_keyboard'])) {
+        return $out;
+    }
+    foreach ($kb['inline_keyboard'] as $row) {
+        foreach ($row as $btn) {
+            $out[] = $btn;
+        }
+    }
+    return $out;
+}
+
+foreach (array('Farsi', 'Codes', 'Order', 'Timer', 'Keyboard', 'Schema', 'Db', 'Telegram', 'Session', 'Router', 'AdminFlow', 'StudentFlow', 'Guard', 'Panel', 'PanelAccess', 'PanelAuth', 'ResultsExport', 'MiniApp', 'MiniAppAuth', 'MiniAppError') as $cls) {
     ok(class_exists($cls), 'class loads: ' . $cls);
 }
 
@@ -70,6 +84,23 @@ list($p, $pages, $off) = Panel::pageNumber(101, 20, 9);
 ok($p === 6 && $pages === 6 && $off === 100, 'Panel::pageNumber clamps and offsets');
 ok(is_array(Keyboard::panelLink('https://example.com/panel/')), 'Keyboard::panelLink builds URL keyboard');
 ok(Keyboard::panelLink('javascript:alert(1)') === null, 'Keyboard::panelLink rejects unsafe URL');
+$webAppButtons = buttons_of(Keyboard::quizList(array(array(
+    'id' => 1,
+    'title' => 'آزمون',
+    'time_limit' => 0,
+    'access_code' => '',
+)), 'https://example.com/miniapp/'));
+$hasWebApp = false;
+foreach ($webAppButtons as $btn) {
+    if (isset($btn['web_app']['url']) && $btn['web_app']['url'] === 'https://example.com/miniapp/') {
+        $hasWebApp = true;
+    }
+}
+ok($hasWebApp, 'Keyboard::quizList adds HTTPS web_app button');
+ok(Keyboard::webApp('http://example.com/miniapp/') === null, 'Keyboard::webApp rejects non-HTTPS URL');
+ok(MiniApp::enabled() === true, 'MiniApp is enabled by default config');
+ok(MiniApp::labels() === array('الف', 'ب', 'پ', 'ت'), 'MiniApp option labels');
+ok(MiniApp::webAppUrl() === null, 'MiniApp::webAppUrl needs HTTPS in CLI');
 $kbs = callbacks_of(Keyboard::adminMenu());
 ok(in_array('adm:panel', $kbs, true), 'admin menu includes panel button');
 ok(ResultsExport::filename(0) !== ResultsExport::filename(7), 'ResultsExport filename distinguishes quizzes');
@@ -141,7 +172,7 @@ foreach ($stmts as $s) {
 }
 ok($allCreate, 'Schema statements are CREATE TABLE only');
 
-$roots = array('index.php', 'install.php', 'poll.php', 'cron_finish.php', 'export.php', 'config.php', 'panel/index.php', 'panel/views/layout.php', 'panel/views/login.php', 'panel/pages/dashboard.php', 'panel/pages/students.php', 'panel/pages/student.php', 'panel/pages/quizzes.php', 'panel/pages/quiz.php', 'panel/pages/question.php', 'panel/pages/results.php', 'panel/pages/attempt.php', 'panel/pages/broadcast.php', 'panel/pages/tools.php');
+$roots = array('index.php', 'install.php', 'poll.php', 'cron_finish.php', 'export.php', 'config.php', 'panel/index.php', 'panel/views/layout.php', 'panel/views/login.php', 'panel/pages/dashboard.php', 'panel/pages/students.php', 'panel/pages/student.php', 'panel/pages/quizzes.php', 'panel/pages/quiz.php', 'panel/pages/question.php', 'panel/pages/results.php', 'panel/pages/attempt.php', 'panel/pages/broadcast.php', 'panel/pages/tools.php', 'miniapp/index.php', 'miniapp/api.php', 'miniapp/assets/app.js', 'miniapp/assets/style.css');
 foreach ($roots as $f) {
     ok(is_file(dirname(__DIR__) . '/' . $f), 'entry file exists: ' . $f);
 }

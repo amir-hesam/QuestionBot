@@ -61,6 +61,16 @@ if ($action !== '') {
                 throw new RuntimeException('deleteWebhook: ' . (isset($res['description']) ? $res['description'] : 'unknown error'));
             }
             $messages[] = array('ok', 'وب‌هوک حذف شد. حالا می‌توانید از حالت poll استفاده کنید.');
+        } elseif ($action === 'miniappmenu') {
+            $miniUrl = MiniApp::webAppUrl();
+            if ($miniUrl === null) {
+                throw new RuntimeException('برای ثبت دکمه مینی‌اپ، آدرس HTTPS لازم است. config.php → miniapp.url را تنظیم کنید.');
+            }
+            $res = App::tg()->setChatMenuButton($miniUrl, 'آزمون‌ها');
+            if (empty($res['ok'])) {
+                throw new RuntimeException('setChatMenuButton: ' . (isset($res['description']) ? $res['description'] : 'unknown error'));
+            }
+            $messages[] = array('ok', 'دکمه مینی‌اپ در منوی ربات ثبت شد: ' . $miniUrl);
         } elseif ($action === 'me') {
             $res = App::tg()->getMe();
             $messages[] = array(empty($res['ok']) ? 'err' : 'ok', json_encode($res, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
@@ -121,6 +131,20 @@ if ($panelUrl === '') {
     $panelUrl = base_url() . '/panel/';
 }
 
+$miniEnabled = MiniApp::enabled();
+$miniUrl = '';
+$miniWebAppUrl = null;
+$miniError = '';
+try {
+    $miniUrl = MiniApp::url();
+    $miniWebAppUrl = MiniApp::webAppUrl();
+    if ($miniUrl !== '' && strpos($miniUrl, '://') === false) {
+        $miniUrl = base_url() . '/' . ltrim($miniUrl, '/');
+    }
+} catch (Throwable $e) {
+    $miniError = $e->getMessage();
+}
+
 $cron = base_url();
 $links = array(
     'migrate' => 'install.php?key=' . rawurlencode($key) . '&action=migrate',
@@ -128,6 +152,7 @@ $links = array(
     'deletewebhook' => 'install.php?key=' . rawurlencode($key) . '&action=deletewebhook',
     'info' => 'install.php?key=' . rawurlencode($key) . '&action=info',
     'me' => 'install.php?key=' . rawurlencode($key) . '&action=me',
+    'miniappmenu' => 'install.php?key=' . rawurlencode($key) . '&action=miniappmenu',
 );
 $cronFinish = $cron . '/cron_finish.php?key=' . rawurlencode($key);
 $pollUrl = $cron . '/poll.php?key=' . rawurlencode($key);
@@ -193,6 +218,7 @@ header('X-Content-Type-Options: nosniff');
    <tr><td>ادمین‌ها</td><td class="<?php echo $adminOk ? 'ok' : 'err'; ?>"><?php echo Farsi::digits(count($admins)); ?> عدد</td></tr>
    <tr><td>حالت دریافت</td><td><code><?php echo h($mode); ?></code></td></tr>
    <tr><td>پنل وب</td><td class="<?php echo $panelEnabled ? 'ok' : 'warn'; ?>"><?php echo $panelEnabled ? 'فعال' : 'غیرفعال (در تلگرام /panel بزنید)'; ?><?php echo $panelError !== '' ? h(' — ' . $panelError) : ''; ?></td></tr>
+   <tr><td>مینی‌اپ دانش‌آموز</td><td class="<?php echo $miniEnabled ? ($miniWebAppUrl !== null ? 'ok' : 'warn') : 'warn'; ?>"><?php echo $miniEnabled ? ($miniWebAppUrl !== null ? 'فعال و آماده HTTPS' : 'فعال — آدرس HTTPS تنظیم نشده') : 'غیرفعال'; ?><?php echo $miniError !== '' ? h(' — ' . $miniError) : ''; ?></td></tr>
   </table>
  </div>
 
@@ -207,6 +233,24 @@ header('X-Content-Type-Options: nosniff');
    و از <code>config.php → panel.user</code> قابل تغییر است.
   </p>
   <p style="font-size:13px;color:#555">اگر پنل را جابه‌جا کردید یا از حالت poll استفاده می‌کنید، آدرس کامل را در <code>config.php → panel.url</code> بگذارید.</p>
+ </div>
+
+ <div class="card">
+  <h2>مینی‌اپ دانش‌آموز</h2>
+  <p style="font-size:13px">آدرس مینی‌اپ:</p>
+  <p><a class="btn" href="<?php echo h($miniUrl); ?>" target="_blank" rel="noopener">بازکردن مینی‌اپ</a></p>
+  <code><?php echo h($miniUrl); ?></code>
+  <p style="font-size:13px;margin-top:12px">
+   اگر آدرس با <code>https://</code> شروع شود، می‌توانید دکمه ثابت مینی‌اپ را در منوی ربات ثبت کنید.
+   دانش‌آموزان از همان دکمه یا دکمه «شروع آزمون در مینی‌اپ» وارد می‌شوند.
+  </p>
+  <p>
+   <a class="btn alt" href="<?php echo h($links['miniappmenu']); ?>">ثبت دکمه مینی‌اپ در منوی ربات</a>
+  </p>
+  <p style="font-size:13px;color:#555">
+   اگر آدرس HTTPS ندارید، مقدار <code>miniapp.url</code> را در <code>config.php</code> تنظیم کنید.
+   برای غیرفعال کردن مینی‌اپ، <code>miniapp.enabled</code> را <code>false</code> بگذارید.
+  </p>
  </div>
 
  <div class="card">

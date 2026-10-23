@@ -28,7 +28,8 @@ class StudentFlow
             "🎓 <b>راهنمای دانش‌آموز</b>\n\n"
             . "/start — نمایش آزمون‌ها\n"
             . "برای شرکت در آزمون، آزمون را انتخاب کن، سپس کد آزمون و کد دانش‌آموزی خودت را وارد کن.\n"
-            . "در طول آزمون می‌توانی با دکمه‌های ◀️ و ▶️ بین سوال‌ها جابه‌جا شوی."
+            . "در طول آزمون می‌توانی با دکمه‌های ◀️ و ▶️ بین سوال‌ها جابه‌جا شوی.\n"
+            . "برای تجربه بهتر، مینی‌اپ را از منوی ربات باز کن."
         );
     }
 
@@ -51,7 +52,11 @@ class StudentFlow
         }
         $text = "👋 <b>خوش آمدی</b>\nیک آزمون را انتخاب کن:\n\n";
         $text .= "برای شرکت، روی آزمون بزن.";
-        self::say($chatId, $text, $mid, Keyboard::quizList($list));
+        $webApp = null;
+        if (MiniApp::enabled() && (string) $chatId === (string) $uid) {
+            $webApp = MiniApp::webAppUrl();
+        }
+        self::say($chatId, $text, $mid, Keyboard::quizList($list, $webApp));
     }
 
     public static function callback($data, $uid, $chatId, $mid)

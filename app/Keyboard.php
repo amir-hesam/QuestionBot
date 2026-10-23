@@ -11,9 +11,13 @@ class Keyboard
         return array('inline_keyboard' => $rows);
     }
 
-    public static function quizList(array $quizzes)
+    public static function quizList(array $quizzes, $webAppUrl = null)
     {
         $rows = array();
+        $webApp = self::webApp($webAppUrl, 'شروع آزمون در مینی‌اپ');
+        if ($webApp !== null) {
+            $rows[] = array($webApp);
+        }
         foreach ($quizzes as $q) {
             $label = '📝 ' . $q['title'];
             if ((int) $q['time_limit'] > 0) {
@@ -51,6 +55,17 @@ class Keyboard
         return self::kb(array(
             array(array('text' => '🌐 باز کردن پنل مدیریت', 'url' => $url)),
         ));
+    }
+
+    public static function webApp($url, $text = 'مینی‌اپ')
+    {
+        if (empty($url) || !preg_match('#^https://#i', (string) $url)) {
+            return null;
+        }
+        return array(
+            'text' => Farsi::clip((string) $text, 60),
+            'web_app' => array('url' => (string) $url),
+        );
     }
 
     public static function question($attemptId, $qid, array $order, $selected, $showAnswer, $correct, $index, $total)
