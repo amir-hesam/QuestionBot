@@ -30,9 +30,12 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+  font-family: Vazirmatn, Tahoma, "Segoe UI", Arial, sans-serif;
   font-size: 14px;
-  line-height: 1.75;
+  line-height: 1.9;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -322,9 +325,9 @@ p {
 label {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
   font-size: 13px;
-  color: #374151;
+  color: var(--text);
 }
 
 input[type="text"],
@@ -636,8 +639,13 @@ details summary {
 }
 
 .login-help {
-  margin: 16px 0 0;
+  margin: 16px 0 12px;
   font-size: 12px;
+}
+
+.login-actions {
+  display: flex;
+  justify-content: center;
 }
 
 .secret {

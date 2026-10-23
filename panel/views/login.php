@@ -17,9 +17,13 @@ if (!isset($flashes) || !is_array($flashes)) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ورود به پنل مدیریت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
 </head>
-<body class="login-body">
+<body class="login-body" data-theme="dark">
 <main class="login-card">
   <div class="login-brand">
     <span class="brand-mark">🤖</span>
@@ -65,6 +69,9 @@ if (!isset($flashes) || !is_array($flashes)) {
     رمز عبور را از پیام ربات دریافت می‌کنید. هر بار زدن دستور <code>/panel</code> رمز جدید می‌سازد و
     نشست‌های قبلی را خارج می‌کند.
   </p>
+  <div class="login-actions">
+    <button class="btn ghost small" type="button" data-theme-toggle>تغییر تم</button>
+  </div>
 </main>
 </body>
 </html>
